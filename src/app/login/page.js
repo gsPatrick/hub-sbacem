@@ -44,20 +44,25 @@ export default function LoginPage() {
 
             // Set token in localStorage and Cookie for backend verification
             localStorage.setItem("central_access_token", data.access_token);
+            // Explicitly set domain if needed, but for same-site Lax is usually enough for the Hub
             document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
 
-            // Check for redirection parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const systemId = urlParams.get("system_id");
-            const redirectUrl = urlParams.get("redirect_url");
+            // Small delay to ensure cookies are processed by the browser before redirect
+            setTimeout(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const systemId = urlParams.get("system_id");
+                const redirectUrl = urlParams.get("redirect_url");
 
-            if (systemId && redirectUrl) {
-                // Redirect back to verification flow in backend
-                window.location.href = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${systemId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
-            } else {
-                // Default redirect
-                router.push(email === "admin@admin.com" ? "/admin" : "/hub");
-            }
+                console.log("DEBUG: Redirection params", { systemId, redirectUrl });
+
+                if (systemId && redirectUrl) {
+                    window.location.href = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${systemId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
+                } else {
+                    // Default redirect based on user (we might need to check role from token but for now...)
+                    // If redirected here with no params, just go to admin if likely admin
+                    router.push("/admin");
+                }
+            }, 100);
         } catch (err) {
             setError(err.message || "Erro ao conectar com o servidor.");
         } finally {

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Search, Plus, MoreHorizontal, LayoutGrid, FileText, Users } from "lucide-react";
 import UserModal from "@/components/admin/UserModal";
 import SystemModal from "@/components/admin/SystemModal";
+import SystemAccessModal from "@/components/admin/SystemAccessModal";
 import { api } from "@/lib/api";
 
 export default function AdminDashboard() {
@@ -29,6 +30,8 @@ export default function AdminDashboard() {
     };
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
+    const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
 
     const [users, setUsers] = useState([]);
     const [systems, setSystems] = useState([]);
@@ -152,6 +155,17 @@ export default function AdminDashboard() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-[#152341] hover:bg-slate-100 font-bold uppercase text-[10px] tracking-widest"
+                                                    onClick={() => {
+                                                        setSelectedUser(user);
+                                                        setIsAccessModalOpen(true);
+                                                    }}
+                                                >
+                                                    <Shield className="h-3 w-3 mr-1" /> Acessos
+                                                </Button>
                                                 {user.is_active ? (
                                                     <Button
                                                         variant="ghost"
@@ -268,6 +282,12 @@ export default function AdminDashboard() {
 
             <UserModal open={isUserModalOpen} onOpenChange={setIsUserModalOpen} onSuccess={fetchData} />
             <SystemModal open={isSystemModalOpen} onOpenChange={setIsSystemModalOpen} onSuccess={fetchData} />
+            <SystemAccessModal
+                open={isAccessModalOpen}
+                onOpenChange={setIsAccessModalOpen}
+                user={selectedUser}
+                onSuccess={fetchData}
+            />
         </div>
     );
 }
