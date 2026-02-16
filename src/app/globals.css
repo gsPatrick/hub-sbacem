@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+@theme {
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:root {
+  --background: #F4F7F9;
+  --foreground: #152341;
+  /* Dark Navy Text */
+
+  --card: #FFFFFF;
+  --card-foreground: #152341;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #152341;
+
+  --primary: #c11e3c;
+  /* Crimson */
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #152341;
+  /* Dark Navy */
+  --secondary-foreground: #FFFFFF;
+
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+
+  --accent: #F1F5F9;
+  --accent-foreground: #152341;
+
+  --destructive: #EF4444;
+  --destructive-foreground: #FAFAFA;
+
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #c11e3c;
+  /* Crimson Ring */
+
+  --radius: 0.25rem;
+}
+
+.dark {
+  --background: #152341;
+  /* Dark Navy Background */
+  --foreground: #F8FAFC;
+
+  --card: #1E293B;
+  --card-foreground: #F8FAFC;
+
+  --popover: #152341;
+  --popover-foreground: #F8FAFC;
+
+  --primary: #c11e3c;
+  /* Crimson */
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #0F172A;
+  --secondary-foreground: #F8FAFC;
+
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8;
+
+  --accent: #1E293B;
+  --accent-foreground: #F8FAFC;
+
+  --destructive: #7F1D1D;
+  --destructive-foreground: #F8FAFC;
+
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #c11e3c;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Animations - Appended */
+@keyframes flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reverse-spin {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-flow {
+  animation: flow 1s linear infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-spin-subtle {
+  animation: spin-slow 60s linear infinite;
+}
+
+.animate-reverse-spin {
+  animation: reverse-spin 25s linear infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
