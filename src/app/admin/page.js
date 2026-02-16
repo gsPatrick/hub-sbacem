@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Search, Plus, MoreHorizontal, LayoutGrid, FileText, Users } from "lucide-react";
+import { Search, Plus, MoreHorizontal, LayoutGrid, FileText, Users, Shield } from "lucide-react";
 import UserModal from "@/components/admin/UserModal";
 import SystemModal from "@/components/admin/SystemModal";
 import SystemAccessModal from "@/components/admin/SystemAccessModal";
 import { api } from "@/lib/api";
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const tabFromUrl = searchParams.get("tab") || "users";
@@ -289,5 +289,17 @@ export default function AdminDashboard() {
                 onSuccess={fetchData}
             />
         </div>
+    );
+}
+
+export default function AdminDashboard() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#c11e3c]"></div>
+            </div>
+        }>
+            <AdminDashboardContent />
+        </Suspense>
     );
 }
