@@ -36,8 +36,10 @@ export default function HubPage() {
 
     const openSystem = (system) => {
         console.log("Iniciando acesso ao sistema:", system.name);
-        // Redirect to verification flow in backend
-        const verifyUrl = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${system.id}&redirect_url=${encodeURIComponent(system.base_url)}`;
+        const token = localStorage.getItem("central_access_token");
+
+        // Redirect to verification flow in backend, passing token explicitly
+        const verifyUrl = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${system.id}&redirect_url=${encodeURIComponent(system.base_url)}&token=${token}`;
         window.location.href = verifyUrl;
     };
 
