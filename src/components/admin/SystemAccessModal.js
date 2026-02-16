@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { api } from "@/lib/api";
-import { Shield, Check, X, RefreshCw } from "lucide-react";
+import { Shield, Check, X, RefreshCw, Loader2 } from "lucide-react";
 
 export default function SystemAccessModal({ open, onOpenChange, user, onSuccess }) {
     const [systems, setSystems] = useState([]);
@@ -24,7 +24,7 @@ export default function SystemAccessModal({ open, onOpenChange, user, onSuccess 
         }
     }, [open, user]);
 
-    const fetchData = async () => {
+    const fetchSystems = async () => {
         setLoading(true);
         try {
             const [allSystemsRes, userSystemsRes] = await Promise.all([
