@@ -23,14 +23,17 @@ export default function LoginPage() {
         setError("");
 
         try {
-            // Use real API login
-            const formData = new FormData();
-            formData.append("username", email);
-            formData.append("password", password);
+            // Use URLSearchParams for application/x-www-form-urlencoded (standard for OAuth2)
+            const params = new URLSearchParams();
+            params.append("username", email);
+            params.append("password", password);
 
             const response = await fetch("https://api.sbacem.com.br/apicentralizadora/auth/login", {
                 method: "POST",
-                body: formData
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params
             });
 
             if (!response.ok) {
