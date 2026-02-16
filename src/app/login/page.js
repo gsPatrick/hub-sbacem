@@ -23,19 +23,41 @@ export default function LoginPage() {
         setError("");
 
         try {
-            console.log("Tentativa de acesso:", email);
+            // Use real API login
+            const formData = new FormData();
+            formData.append("username", email);
+            formData.append("password", password);
 
-            // Handshake Simulation
-            setTimeout(() => {
-                if (email === "admin@admin.com") {
-                    router.push("/admin");
-                } else {
-                    router.push("/hub");
-                }
-                setLoading(false);
-            }, 2000);
+            const response = await fetch("https://api.sbacem.com.br/apicentralizadora/auth/login", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error("Credenciais inválidas.");
+            }
+
+            const data = await response.json();
+
+            // Set token in localStorage and Cookie for backend verification
+            localStorage.setItem("central_access_token", data.access_token);
+            document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+
+            // Check for redirection parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const systemId = urlParams.get("system_id");
+            const redirectUrl = urlParams.get("redirect_url");
+
+            if (systemId && redirectUrl) {
+                // Redirect back to verification flow in backend
+                window.location.href = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${systemId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
+            } else {
+                // Default redirect
+                router.push(email === "admin@admin.com" ? "/admin" : "/hub");
+            }
         } catch (err) {
-            setError("Credenciais inválidas. Verifique seus dados.");
+            setError(err.message || "Erro ao conectar com o servidor.");
+        } finally {
             setLoading(false);
         }
     };
