@@ -84,9 +84,19 @@ export default function HubPage() {
             {/* --- SYSTEM CARDS --- */}
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-10">
                 {loading ? (
-                    <div className="col-span-full flex flex-col items-center justify-center py-24 text-slate-400">
-                        <RefreshCw className="h-12 w-12 animate-spin mb-4" />
-                        <span className="font-bold uppercase tracking-widest text-sm text-slate-500">Sincronizando Autorizações...</span>
+                    <div className="col-span-full flex flex-col items-center justify-center py-24 text-slate-400 font-sans">
+                        <div className="relative mb-8">
+                            <div className="absolute inset-0 bg-slate-300 rounded-full blur-2xl opacity-20 animate-ping" />
+                            <div className="relative h-20 w-20 bg-white rounded-2xl flex items-center justify-center border border-slate-200 shadow-xl">
+                                <Shield className="h-10 w-10 text-[#152341] animate-pulse" />
+                            </div>
+                        </div>
+                        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-slate-600 drop-shadow-sm text-center">
+                            Sincronizando Autorizações
+                        </h2>
+                        <div className="w-32 h-1 bg-slate-200 rounded-full mt-4 overflow-hidden">
+                            <div className="h-full bg-[#152341] animate-[progress_2s_ease-in-out_infinite]" />
+                        </div>
                     </div>
                 ) : (
                     <>
