@@ -47,20 +47,35 @@ export default function LoginPage() {
             // Explicitly set domain if needed, but for same-site Lax is usually enough for the Hub
             document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
 
+            // Helper to parse JWT
+            const parseJwt = (token) => {
+                try {
+                    return JSON.parse(atob(token.split('.')[1]));
+                } catch (e) {
+                    return null;
+                }
+            };
+
+            const decoded = parseJwt(data.access_token);
+            const isSuperAdmin = decoded?.is_superadmin || false;
+
             // Small delay to ensure cookies are processed by the browser before redirect
             setTimeout(() => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const systemId = urlParams.get("system_id");
                 const redirectUrl = urlParams.get("redirect_url");
 
-                console.log("DEBUG: Redirection params", { systemId, redirectUrl });
+                console.log("DEBUG: Redirection params", { systemId, redirectUrl, isSuperAdmin });
 
                 if (systemId && redirectUrl) {
                     window.location.href = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${systemId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
                 } else {
-                    // Default redirect based on user (we might need to check role from token but for now...)
-                    // If redirected here with no params, just go to admin if likely admin
-                    router.push("/admin");
+                    // Default redirect based on user role
+                    if (isSuperAdmin) {
+                        router.push("/admin");
+                    } else {
+                        router.push("/hub");
+                    }
                 }
             }, 100);
         } catch (err) {

@@ -14,8 +14,9 @@ import { Shield, Check, X, RefreshCw } from "lucide-react";
 
 export default function SystemAccessModal({ open, onOpenChange, user, onSuccess }) {
     const [systems, setSystems] = useState([]);
+    const [userSystemIds, setUserSystemIds] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
+    const [savingId, setSavingId] = useState(null);
 
     useEffect(() => {
         if (open) {
@@ -23,30 +24,46 @@ export default function SystemAccessModal({ open, onOpenChange, user, onSuccess 
         }
     }, [open, user]);
 
-    const fetchSystems = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            // In a real app, you'd fetch both all systems and the user's specific access
-            // For now, let's assume the user object might have system_ids or we fetch a list
-            const response = await api.get("/systems/");
-            setSystems(response.data);
+            const [allSystemsRes, userSystemsRes] = await Promise.all([
+                api.get("/systems/"),
+                api.get(`/users/${user.id}/systems`)
+            ]);
+            setSystems(allSystemsRes.data);
+            setUserSystemIds(userSystemsRes.data.map(s => s.id));
         } catch (error) {
-            console.error("Error fetching systems", error);
+            console.error("Error fetching data", error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleToggleAccess = async (systemId) => {
-        setSaving(true);
+        setSavingId(systemId);
+        const hasAccess = userSystemIds.includes(systemId);
+
         try {
-            // Mock API call to toggle access
-            // await api.post(`/users/${user.id}/systems/${systemId}/toggle`);
-            alert("Funcionalidade em desenvolvimento: O backend ainda não possui o endpoint centralizado de acesso por usuário/sistema.");
+            if (hasAccess) {
+                await api.post("/access/revoke", {
+                    user_id: user.id,
+                    system_id: systemId
+                });
+                setUserSystemIds(prev => prev.filter(id => id !== systemId));
+            } else {
+                await api.post("/access/grant", {
+                    user_id: user.id,
+                    system_id: systemId
+                });
+                setUserSystemIds(prev => [...prev, systemId]);
+            }
+            if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Error toggling access", error);
+            alert("Erro ao alterar acesso.");
         } finally {
-            setSaving(false);
+            setSavingId(null);
         }
     };
 
@@ -71,31 +88,38 @@ export default function SystemAccessModal({ open, onOpenChange, user, onSuccess 
                     </div>
                 ) : (
                     <div className="space-y-2 max-h-[300px] overflow-auto pr-2">
-                        {systems.map((sys) => (
-                            <div
-                                key={sys.id}
-                                className="flex items-center justify-between p-3 rounded-sm border border-slate-100 hover:bg-slate-50 transition-colors"
-                            >
-                                <div>
-                                    <div className="font-bold text-[#152341] text-sm">{sys.name}</div>
-                                    <div className="text-[10px] text-slate-400 font-medium truncate max-w-[200px]">{sys.base_url}</div>
-                                </div>
+                        {systems.map((sys) => {
+                            const isLiberado = userSystemIds.includes(sys.id);
+                            const isSaving = savingId === sys.id;
 
-                                <Button
-                                    size="sm"
-                                    variant={sys.id % 2 === 0 ? "outline" : "default"} // Mock state
-                                    className={sys.id % 2 === 0 ? "text-slate-400 border-slate-200" : "bg-green-600 hover:bg-green-700 text-white"}
-                                    onClick={() => handleToggleAccess(sys.id)}
-                                    disabled={saving}
+                            return (
+                                <div
+                                    key={sys.id}
+                                    className="flex items-center justify-between p-3 rounded-sm border border-slate-100 hover:bg-slate-50 transition-colors"
                                 >
-                                    {sys.id % 2 === 0 ? (
-                                        <><X className="h-3 w-3 mr-1" /> Bloqueado</>
-                                    ) : (
-                                        <><Check className="h-3 w-3 mr-1" /> Liberado</>
-                                    )}
-                                </Button>
-                            </div>
-                        ))}
+                                    <div>
+                                        <div className="font-bold text-[#152341] text-sm">{sys.name}</div>
+                                        <div className="text-[10px] text-slate-400 font-medium truncate max-w-[200px]">{sys.base_url}</div>
+                                    </div>
+
+                                    <Button
+                                        size="sm"
+                                        variant={!isLiberado ? "outline" : "default"}
+                                        className={!isLiberado ? "text-slate-400 border-slate-200" : "bg-green-600 hover:bg-green-700 text-white"}
+                                        onClick={() => handleToggleAccess(sys.id)}
+                                        disabled={!!savingId}
+                                    >
+                                        {isSaving ? (
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : isLiberado ? (
+                                            <><Check className="h-3 w-3 mr-1" /> Liberado</>
+                                        ) : (
+                                            <><X className="h-3 w-3 mr-1" /> Bloqueado</>
+                                        )}
+                                    </Button>
+                                </div>
+                            );
+                        })}
                         {systems.length === 0 && (
                             <div className="text-center py-8 text-slate-400 text-sm italic">
                                 Nenhum sistema registrado.
