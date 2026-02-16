@@ -14,9 +14,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/components/ui/Input";
 
 const menuItems = [
-    { icon: Users, label: "Governança de Usuários", href: "/admin" },
-    { icon: Settings, label: "Registro de Sistemas", href: "/admin/systems" },
-    { icon: Activity, label: "Auditoria e Logs", href: "/admin/audit" },
+    { icon: Users, label: "Governança de Usuários", href: "/admin?tab=users" },
+    { icon: Settings, label: "Registro de Sistemas", href: "/admin?tab=systems" },
+    { icon: Activity, label: "Auditoria e Logs", href: "/admin?tab=audit" },
 ];
 
 export default function AdminLayout({ children }) {

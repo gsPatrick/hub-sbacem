@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -10,7 +11,22 @@ import SystemModal from "@/components/admin/SystemModal";
 import { api } from "@/lib/api";
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState("users"); // users, systems, audit
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const tabFromUrl = searchParams.get("tab") || "users";
+
+    const [activeTab, setActiveTab] = useState(tabFromUrl); // users, systems, audit
+
+    useEffect(() => {
+        if (tabFromUrl && tabFromUrl !== activeTab) {
+            setActiveTab(tabFromUrl);
+        }
+    }, [tabFromUrl]);
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        router.push(`/admin?tab=${tab}`, { scroll: false });
+    };
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
 
@@ -71,19 +87,19 @@ export default function AdminDashboard() {
             {/* Tabs */}
             <div className="flex border-b border-slate-200">
                 <button
-                    onClick={() => setActiveTab("users")}
+                    onClick={() => handleTabChange("users")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "users" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                 >
                     <Users className="h-4 w-4" /> Usuários
                 </button>
                 <button
-                    onClick={() => setActiveTab("systems")}
+                    onClick={() => handleTabChange("systems")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "systems" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                 >
                     <LayoutGrid className="h-4 w-4" /> Sistemas
                 </button>
                 <button
-                    onClick={() => setActiveTab("audit")}
+                    onClick={() => handleTabChange("audit")}
                     className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "audit" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                 >
                     <FileText className="h-4 w-4" /> Auditoria
