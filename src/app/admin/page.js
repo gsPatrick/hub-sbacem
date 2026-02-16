@@ -1,19 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Search, Plus, MoreHorizontal } from "lucide-react";
+import { Search, Plus, MoreHorizontal, LayoutGrid, FileText, Users } from "lucide-react";
 import UserModal from "@/components/admin/UserModal";
+import SystemModal from "@/components/admin/SystemModal";
+import { api } from "@/lib/api";
 
 export default function AdminDashboard() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [users, setUsers] = useState([
-        { id: 1, email: "admin@admin.com", is_superadmin: true, role: "Super Administrador", systems: ["Todos"] },
-        { id: 2, email: "analista@empresa.com.br", is_superadmin: false, role: "Analista", systems: ["OCR", "Gestão"] },
-    ]);
+    const [activeTab, setActiveTab] = useState("users"); // users, systems, audit
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+    const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
+
+    const [users, setUsers] = useState([]);
+    const [systems, setSystems] = useState([]);
+    const [auditLogs, setAuditLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+
     const [search, setSearch] = useState("");
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [usersRes, systemsRes, auditRes] = await Promise.all([
+                api.get("/users/"),
+                api.get("/systems/"),
+                api.get("/audit/")
+            ]);
+            setUsers(usersRes.data);
+            setSystems(systemsRes.data);
+            setAuditLogs(auditRes.data);
+        } catch (error) {
+            console.error("Error fetching admin data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const filteredUsers = users.filter((u) => u.email.includes(search));
 
@@ -22,78 +50,170 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-[#152341] uppercase">Governança de Identidades</h1>
-                    <p className="text-slate-500 text-sm mt-1">Gerenciamento centralizado de credenciais e permissões.</p>
+                    <p className="text-slate-500 text-sm mt-1">Gerenciamento centralizado de credenciais, sistemas e auditoria.</p>
                 </div>
-                <Button className="bg-[#c11e3c] hover:bg-[#a01830] text-white font-bold uppercase tracking-wide rounded-sm" onClick={() => setIsModalOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Novo Usuário
-                </Button>
-            </div>
-
-            <div className="flex items-center space-x-4 bg-white p-4 rounded-sm border border-slate-200 shadow-sm">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                    <Input
-                        placeholder="Buscar credencial..."
-                        className="pl-10 h-10 border-slate-300 rounded-sm"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+                <div className="flex gap-2">
+                    {activeTab === "users" && (
+                        <Button className="bg-[#c11e3c] hover:bg-[#a01830] text-white font-bold uppercase tracking-wide rounded-sm" onClick={() => setIsUserModalOpen(true)}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Novo Usuário
+                        </Button>
+                    )}
+                    {activeTab === "systems" && (
+                        <Button className="bg-[#152341] hover:bg-[#0e172b] text-white font-bold uppercase tracking-wide rounded-sm" onClick={() => setIsSystemModalOpen(true)}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Novo Sistema
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            <div className="bg-white rounded-sm border border-slate-200 overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider">
-                        <tr>
-                            <th className="px-6 py-4">Credencial</th>
-                            <th className="px-6 py-4">Perfil (Hub)</th>
-                            <th className="px-6 py-4">Acessos Concedidos</th>
-                            <th className="px-6 py-4">Situação</th>
-                            <th className="px-6 py-4 text-right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {filteredUsers.map((user) => (
-                            <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-6 py-4 font-semibold text-[#152341]">
-                                    {user.email}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {user.is_superadmin ? (
-                                        <Badge variant="destructive" className="uppercase text-[10px] font-bold tracking-wide">Admin Master</Badge>
-                                    ) : (
-                                        <span className="text-slate-500 font-medium">Usuário Padrão</span>
-                                    )}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex gap-1 flex-wrap">
-                                        {user.systems.map((sys) => (
-                                            <Badge key={sys} variant="outline" className="text-slate-600 border-slate-300 font-medium">{sys}</Badge>
-                                        ))}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center font-medium text-green-700">
-                                        <div className="h-2 w-2 rounded-full bg-green-600 mr-2" />
-                                        Ativo
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <Button variant="ghost" size="sm" className="hover:bg-slate-100 text-slate-500 hover:text-[#152341]">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </td>
+            {/* Tabs */}
+            <div className="flex border-b border-slate-200">
+                <button
+                    onClick={() => setActiveTab("users")}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "users" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                >
+                    <Users className="h-4 w-4" /> Usuários
+                </button>
+                <button
+                    onClick={() => setActiveTab("systems")}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "systems" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                >
+                    <LayoutGrid className="h-4 w-4" /> Sistemas
+                </button>
+                <button
+                    onClick={() => setActiveTab("audit")}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "audit" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                >
+                    <FileText className="h-4 w-4" /> Auditoria
+                </button>
+            </div>
+
+            {/* Content Users */}
+            {activeTab === "users" && (
+                <>
+                    <div className="flex items-center space-x-4 bg-white p-4 rounded-sm border border-slate-200 shadow-sm">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Buscar credencial..."
+                                className="pl-10 h-10 border-slate-300 rounded-sm"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-sm border border-slate-200 overflow-hidden shadow-sm">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider">
+                                <tr>
+                                    <th className="px-6 py-4">Credencial</th>
+                                    <th className="px-6 py-4">Perfil (Hub)</th>
+                                    <th className="px-6 py-4">Situação</th>
+                                    <th className="px-6 py-4 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {filteredUsers.map((user) => (
+                                    <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className="px-6 py-4 font-semibold text-[#152341]">
+                                            {user.email}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {user.is_superadmin ? (
+                                                <Badge variant="destructive" className="uppercase text-[10px] font-bold tracking-wide">Admin Master</Badge>
+                                            ) : (
+                                                <span className="text-slate-500 font-medium">Usuário Padrão</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center font-medium text-green-700">
+                                                <div className="h-2 w-2 rounded-full bg-green-600 mr-2" />
+                                                Ativo
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <Button variant="ghost" size="sm" className="hover:bg-slate-100 text-slate-500 hover:text-[#152341]">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {!loading && filteredUsers.length === 0 && (
+                            <div className="p-12 text-center text-slate-500">Nenhum registro encontrado.</div>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {/* Content Systems */}
+            {activeTab === "systems" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {systems.map((sys) => (
+                        <div key={sys.id} className="bg-white p-6 rounded-sm border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-bold text-lg text-[#152341]">{sys.name}</h3>
+                                    <Badge variant="outline">ID: {sys.id}</Badge>
+                                </div>
+                                <p className="text-sm text-slate-500 truncate">{sys.base_url}</p>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+                                <Button variant="ghost" size="sm" className="text-[#c11e3c]">Configurar</Button>
+                            </div>
+                        </div>
+                    ))}
+                    {systems.length === 0 && !loading && (
+                        <div className="col-span-full p-12 text-center text-slate-500 bg-white border border-dashed border-slate-300 rounded-sm">
+                            Nenhum sistema cadastrado.
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Content Audit */}
+            {activeTab === "audit" && (
+                <div className="bg-white rounded-sm border border-slate-200 overflow-hidden shadow-sm">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider">
+                            <tr>
+                                <th className="px-6 py-4">Data/Hora</th>
+                                <th className="px-6 py-4">Ação</th>
+                                <th className="px-6 py-4">Usuário (Admin)</th>
+                                <th className="px-6 py-4">Detalhes</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {filteredUsers.length === 0 && (
-                    <div className="p-12 text-center text-slate-500">Nenhum registro encontrado.</div>
-                )}
-            </div>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {auditLogs.map((log) => (
+                                <tr key={log.id} className="hover:bg-slate-50">
+                                    <td className="px-6 py-4 text-slate-500">
+                                        {new Date(log.timestamp).toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4 font-bold text-[#152341]">
+                                        {log.action}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        ID {log.user_id}
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-600 truncate max-w-xs">
+                                        {log.details}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {auditLogs.length === 0 && !loading && (
+                        <div className="p-12 text-center text-slate-500">Nenhum registro de auditoria.</div>
+                    )}
+                </div>
+            )}
 
-            <UserModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+            <UserModal open={isUserModalOpen} onOpenChange={setIsUserModalOpen} onSuccess={fetchData} />
+            <SystemModal open={isSystemModalOpen} onOpenChange={setIsSystemModalOpen} onSuccess={fetchData} />
         </div>
     );
 }
