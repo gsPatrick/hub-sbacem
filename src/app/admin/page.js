@@ -129,15 +129,53 @@ export default function AdminDashboard() {
                                             )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex items-center font-medium text-green-700">
-                                                <div className="h-2 w-2 rounded-full bg-green-600 mr-2" />
-                                                Ativo
+                                            <div className={`flex items-center font-medium ${user.is_active ? "text-green-700" : "text-red-700"}`}>
+                                                <div className={`h-2 w-2 rounded-full mr-2 ${user.is_active ? "bg-green-600" : "bg-red-600"}`} />
+                                                {user.is_active ? "Ativo" : "Inativo"}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <Button variant="ghost" size="sm" className="hover:bg-slate-100 text-slate-500 hover:text-[#152341]">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                {user.is_active ? (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                                        onClick={async () => {
+                                                            if (!confirm("Deseja desativar este usuário?")) return;
+                                                            await api.patch(`/users/${user.id}/deactivate`);
+                                                            fetchData();
+                                                        }}
+                                                    >
+                                                        Desativar
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                        onClick={async () => {
+                                                            await api.patch(`/users/${user.id}/activate`);
+                                                            fetchData();
+                                                        }}
+                                                    >
+                                                        Ativar
+                                                    </Button>
+                                                )}
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={async () => {
+                                                        if (!confirm("Tem certeza que deseja EXCLUIR este usuário? Essa ação é irreversível.")) return;
+                                                        await api.delete(`/users/${user.id}`);
+                                                        fetchData();
+                                                    }}
+                                                >
+                                                    Excluir
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
