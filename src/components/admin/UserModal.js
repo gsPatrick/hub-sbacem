@@ -140,7 +140,7 @@ export default function UserModal({ open, onOpenChange, onSuccess }) {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-[#152341] uppercase">Senha Temporária</label>
+                                <label className="text-sm font-bold text-[#152341] uppercase">Senha</label>
                                 <Input
                                     type="password"
                                     placeholder="••••••••"
