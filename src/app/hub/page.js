@@ -1,89 +1,113 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/Badge";
-import { FileText, Database, Users, ChevronRight, Lock } from "lucide-react";
+import { FileText, Database, Users, ChevronRight, Lock, Monitor, Shield, RefreshCw } from "lucide-react";
 import { cn } from "@/components/ui/Input";
+import { api } from "@/lib/api";
 
-const systems = [
-    {
-        id: "sat-1",
-        name: "Gestão Documental",
-        access: true,
-        icon: FileText,
-    },
-    {
-        id: "sat-2",
-        name: "Motor OCR",
-        access: true,
-        icon: Database,
-    },
-    {
-        id: "sat-3",
-        name: "Portal do Associado",
-        access: false,
-        icon: Users,
-    }
-];
+const ICON_MAP = {
+    "Gestão Documental": FileText,
+    "Motor OCR": Database,
+    "Portal do Associado": Users,
+    "Associação": Users,
+    "OCR": Database,
+    "PDF": FileText,
+};
 
 export default function HubPage() {
-    const openSystem = (sysId) => {
-        console.log("Iniciando acesso ao sistema:", sysId);
+    const [systems, setSystems] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchMySystems();
+    }, []);
+
+    const fetchMySystems = async () => {
+        try {
+            const response = await api.get("/users/me/systems");
+            setSystems(response.data);
+        } catch (error) {
+            console.error("Erro ao buscar sistemas:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const openSystem = (system) => {
+        console.log("Iniciando acesso ao sistema:", system.name);
+        // Redirect to verification flow in backend
+        const verifyUrl = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${system.id}&redirect_url=${encodeURIComponent(system.base_url)}`;
+        window.location.href = verifyUrl;
+    };
+
+    const getIcon = (name) => {
+        return ICON_MAP[name] || Monitor;
     };
 
     return (
         <div className="min-h-screen bg-[#F4F7F9] text-[#152341] p-6 lg:p-12 flex flex-col items-center">
 
             {/* --- HEADER LOGOS --- */}
-            <div className="w-full max-w-7xl flex flex-col items-center mb-24 animate-in fade-in slide-in-from-top-4 duration-1000">
-                <div className="flex items-center gap-10 opacity-90 hover:opacity-100 transition-opacity">
-                    <img src="/sbacem.png" alt="SBACEM" className="h-16 lg:h-20 w-auto object-contain hover:scale-105 transition-transform" />
+            <div className="w-full max-w-7xl flex flex-col items-center mb-16 animate-in fade-in slide-in-from-top-4 duration-1000">
+                <div className="flex items-center gap-10 opacity-90">
+                    <img src="/sbacem.png" alt="SBACEM" className="h-16 lg:h-20 w-auto object-contain" />
                     <div className="h-12 w-1 bg-slate-300 rounded-full"></div>
-                    <img src="/figa.png" alt="FIGA" className="h-16 lg:h-20 w-auto object-contain hover:scale-105 transition-transform" />
+                    <img src="/figa.png" alt="FIGA" className="h-16 lg:h-20 w-auto object-contain" />
                 </div>
+                <h1 className="mt-8 text-4xl font-black tracking-tighter text-[#152341] uppercase">Hub de Aplicações</h1>
+                <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-2">Selecione o ecossistema para acesso autenticado</p>
             </div>
 
-            {/* --- SYSTEM CARDS (LARGE & DENSE) --- */}
+            {/* --- SYSTEM CARDS --- */}
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-10">
-                {systems.map((sys, idx) => (
-                    <button
-                        key={sys.id}
-                        onClick={() => sys.access && openSystem(sys.id)}
-                        disabled={!sys.access}
-                        className={cn(
-                            "group relative flex flex-col items-center justify-center h-80 w-full rounded-lg bg-gradient-to-br from-[#152341] to-[#0f172a] p-10 transition-all duration-500 hover:shadow-2xl hover:shadow-[#c11e3c]/20 hover:-translate-y-2 overflow-hidden",
-                            !sys.access ? "opacity-80 grayscale cursor-not-allowed border-4 border-slate-700" : "shadow-xl border-b-8 border-[#c11e3c]"
-                        )}
-                        style={{ animationDelay: `${idx * 150}ms` }}
-                    >
-                        {/* Dense Texture Overlay */}
-                        <div className="absolute inset-0 bg-[url('/grid-pattern.png')] opacity-5 mix-blend-overlay group-hover:opacity-10 transition-opacity" />
+                {loading ? (
+                    <div className="col-span-full flex flex-col items-center justify-center py-24 text-slate-400">
+                        <RefreshCw className="h-12 w-12 animate-spin mb-4" />
+                        <span className="font-bold uppercase tracking-widest text-sm text-slate-500">Sincronizando Autorizações...</span>
+                    </div>
+                ) : (
+                    <>
+                        {systems.map((sys, idx) => {
+                            const IconComp = getIcon(sys.name);
+                            return (
+                                <button
+                                    key={sys.id}
+                                    onClick={() => openSystem(sys)}
+                                    className={cn(
+                                        "group relative flex flex-col items-center justify-center h-80 w-full rounded-lg bg-gradient-to-br from-[#152341] to-[#0f172a] p-10 transition-all duration-500 hover:shadow-2xl hover:shadow-[#c11e3c]/20 hover:-translate-y-2 overflow-hidden shadow-xl border-b-8 border-[#c11e3c]"
+                                    )}
+                                    style={{ animationDelay: `${idx * 150}ms` }}
+                                >
+                                    <div className="absolute inset-0 bg-[url('/grid-pattern.png')] opacity-5 mix-blend-overlay group-hover:opacity-10 transition-opacity" />
+                                    <div className="absolute inset-0 bg-[#c11e3c] opacity-0 group-hover:opacity-5 transition-opacity duration-700 blur-xl" />
 
-                        {/* Radial Highlight on Hover */}
-                        <div className="absolute inset-0 bg-[#c11e3c] opacity-0 group-hover:opacity-5 transition-opacity duration-700 blur-xl" />
+                                    <div className={cn(
+                                        "mb-8 p-6 rounded-2xl transition-all duration-500 group-hover:scale-110 shadow-lg bg-white/5 text-white ring-1 ring-white/10 group-hover:bg-white/10"
+                                    )}>
+                                        <IconComp className="h-12 w-12" />
+                                    </div>
 
-                        {/* Icon Container */}
-                        <div className={cn(
-                            "mb-8 p-6 rounded-2xl transition-all duration-500 group-hover:scale-110 shadow-lg",
-                            sys.access ? "bg-white/5 text-white ring-1 ring-white/10 group-hover:bg-white/10" : "bg-slate-800 text-slate-500"
-                        )}>
-                            {sys.access ? <sys.icon className="h-12 w-12" /> : <Lock className="h-12 w-12" />}
-                        </div>
+                                    <h3 className="text-2xl lg:text-3xl font-bold text-white uppercase tracking-wider text-center group-hover:text-[#c11e3c] transition-colors drop-shadow-md">
+                                        {sys.name}
+                                    </h3>
 
-                        {/* Name */}
-                        <h3 className="text-2xl lg:text-3xl font-bold text-white uppercase tracking-wider text-center group-hover:text-[#c11e3c] transition-colors drop-shadow-md">
-                            {sys.name}
-                        </h3>
-
-                        {/* Heavy Hover Action Indicator */}
-                        {sys.access && (
-                            <div className="absolute bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                                <span className="text-sm font-bold text-slate-300 uppercase tracking-widest">Acessar</span>
-                                <ChevronRight className="h-5 w-5 text-[#c11e3c]" />
+                                    <div className="absolute bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                                        <span className="text-sm font-bold text-slate-300 uppercase tracking-widest">Acessar</span>
+                                        <ChevronRight className="h-5 w-5 text-[#c11e3c]" />
+                                    </div>
+                                </button>
+                            );
+                        })}
+                        {systems.length === 0 && (
+                            <div className="col-span-full flex flex-col items-center justify-center py-24 bg-white/50 rounded-lg border-2 border-dashed border-slate-200">
+                                <Lock className="h-16 w-16 text-slate-300 mb-4" />
+                                <h2 className="text-xl font-bold text-[#152341] uppercase tracking-tight">Nenhum Acesso Localizado</h2>
+                                <p className="text-slate-500 text-sm mt-2 text-center max-w-sm">Sua conta não possui permissões vinculadas a nenhum sistema satélite. Entre em contato com a administração.</p>
                             </div>
                         )}
-                    </button>
-                ))}
+                    </>
+                )}
             </div>
 
             {/* Footer */}
