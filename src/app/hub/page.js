@@ -18,8 +18,18 @@ const ICON_MAP = {
 export default function HubPage() {
     const [systems, setSystems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
     useEffect(() => {
+        const token = localStorage.getItem("central_access_token");
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                setIsSuperAdmin(payload.is_superadmin || false);
+            } catch (e) {
+                console.error("Erro ao decodificar token");
+            }
+        }
         fetchMySystems();
     }, []);
 
@@ -59,6 +69,16 @@ export default function HubPage() {
                 </div>
                 <h1 className="mt-8 text-4xl font-black tracking-tighter text-[#152341] uppercase">Hub de Aplicações</h1>
                 <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-2">Selecione o ecossistema para acesso autenticado</p>
+
+                {isSuperAdmin && (
+                    <button
+                        onClick={() => window.location.href = '/admin'}
+                        className="mt-6 flex items-center gap-2 px-6 py-2 bg-white text-[#c11e3c] border-2 border-[#c11e3c] font-black uppercase tracking-tighter text-xs hover:bg-[#c11e3c] hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-md"
+                    >
+                        <Shield className="h-4 w-4" />
+                        Acessar Painel de Controle
+                    </button>
+                )}
             </div>
 
             {/* --- SYSTEM CARDS --- */}

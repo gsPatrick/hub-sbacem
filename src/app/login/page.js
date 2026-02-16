@@ -68,14 +68,10 @@ export default function LoginPage() {
                 console.log("DEBUG: Redirection params", { systemId, redirectUrl, isSuperAdmin });
 
                 if (systemId && redirectUrl) {
-                    window.location.href = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${systemId}&redirect_url=${encodeURIComponent(redirectUrl)}`;
+                    window.location.href = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${systemId}&redirect_url=${encodeURIComponent(redirectUrl)}&token=${data.access_token}`;
                 } else {
-                    // Default redirect based on user role
-                    if (isSuperAdmin) {
-                        router.push("/admin");
-                    } else {
-                        router.push("/hub");
-                    }
+                    // Default redirect to Hub for everyone (superadmins can access admin panel from there)
+                    router.push("/hub");
                 }
             }, 100);
         } catch (err) {
