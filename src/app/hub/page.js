@@ -48,8 +48,11 @@ export default function HubPage() {
         console.log("Iniciando acesso ao sistema:", system.name);
         const token = localStorage.getItem("central_access_token");
 
+        // Special case: Cadastro system should redirect to /admin authenticated area
+        const targetUrl = system.id === 3 ? `${system.base_url}/admin` : system.base_url;
+
         // Redirect to verification flow in backend, passing token explicitly
-        const verifyUrl = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${system.id}&redirect_url=${encodeURIComponent(system.base_url)}&token=${token}`;
+        const verifyUrl = `https://api.sbacem.com.br/apicentralizadora/auth/verify-session-browser?system_id=${system.id}&redirect_url=${encodeURIComponent(targetUrl)}&token=${token}`;
         window.location.href = verifyUrl;
     };
 
