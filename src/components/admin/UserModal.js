@@ -94,8 +94,7 @@ export default function UserModal({ open, onOpenChange, onSuccess }) {
     return (
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-all duration-300" />
-                <DialogHeader className="p-6 pb-0">
+                <DialogHeader>
                     <DialogTitle className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#152341] to-[#c11e3c] uppercase tracking-tighter">
                         Nova Credencial
                     </DialogTitle>
@@ -105,7 +104,7 @@ export default function UserModal({ open, onOpenChange, onSuccess }) {
                 </DialogHeader>
 
                 {/* Tabs */}
-                <div className="flex border-b border-slate-200 px-6 mt-4">
+                <div className="flex border-b border-slate-200 mt-2">
                     <button
                         onClick={() => setActiveTab("identity")}
                         className={cn(
@@ -130,7 +129,7 @@ export default function UserModal({ open, onOpenChange, onSuccess }) {
                     </button>
                 </div>
 
-                <div className="p-6 space-y-6 min-h-[300px] max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div className="py-6 space-y-6 min-h-[300px] max-h-[60vh] overflow-y-auto custom-scrollbar">
                     {activeTab === "identity" && (
                         <div className="space-y-5 animate-in slide-in-from-bottom-4 fade-in duration-500">
                             <div className="space-y-2 group">
@@ -263,7 +262,7 @@ export default function UserModal({ open, onOpenChange, onSuccess }) {
                     )}
                 </div>
 
-                <DialogFooter className="p-6 pt-2 border-t border-slate-100 mt-2 bg-slate-50/50">
+                <DialogFooter>
                     <Button 
                         variant="ghost" 
                         onClick={() => onOpenChange(false)} 

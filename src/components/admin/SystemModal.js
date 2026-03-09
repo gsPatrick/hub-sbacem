@@ -32,8 +32,7 @@ export default function SystemModal({ open, onOpenChange, onSuccess }) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-all duration-300" />
-            <DialogHeader className="p-6 pb-0">
+            <DialogHeader>
                 <DialogTitle className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#152341] to-[#c11e3c] uppercase tracking-tighter">
                     Cadastro de Sistema
                 </DialogTitle>
@@ -42,7 +41,7 @@ export default function SystemModal({ open, onOpenChange, onSuccess }) {
                 </p>
             </DialogHeader>
 
-            <div className="p-6 py-8 space-y-6">
+            <div className="py-6 space-y-6 flex-1">
                 <div className="space-y-2 group">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest group-focus-within:text-[#c11e3c] transition-colors">
                         Nome do Sistema
@@ -67,7 +66,7 @@ export default function SystemModal({ open, onOpenChange, onSuccess }) {
                 </div>
             </div>
 
-            <DialogFooter className="p-6 pt-2 border-t border-slate-100 bg-slate-50/50 mt-2">
+            <DialogFooter>
                 <Button 
                     variant="ghost" 
                     onClick={() => onOpenChange(false)} 
