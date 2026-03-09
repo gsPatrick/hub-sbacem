@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Search, Plus, MoreHorizontal, LayoutGrid, FileText, Users, Shield } from "lucide-react";
+import { Search, Plus, MoreHorizontal, LayoutGrid, FileText, Users, Shield, Music } from "lucide-react";
 import UserModal from "@/components/admin/UserModal";
 import SystemModal from "@/components/admin/SystemModal";
 import SystemAccessModal from "@/components/admin/SystemAccessModal";
