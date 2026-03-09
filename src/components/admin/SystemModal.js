@@ -32,40 +32,56 @@ export default function SystemModal({ open, onOpenChange, onSuccess }) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogHeader>
-                <DialogTitle>Cadastro de Sistema</DialogTitle>
-                <p className="text-sm text-slate-500">Adicione um novo sistema satélite ao ecossistema.</p>
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-all duration-300" />
+            <DialogHeader className="p-6 pb-0">
+                <DialogTitle className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#152341] to-[#c11e3c] uppercase tracking-tighter">
+                    Cadastro de Sistema
+                </DialogTitle>
+                <p className="text-sm font-medium text-slate-500 mt-2">
+                    Adicione um novo sistema satélite ao ecossistema Hub Central.
+                </p>
             </DialogHeader>
 
-            <div className="py-4 space-y-4">
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Nome do Sistema</label>
+            <div className="p-6 py-8 space-y-6">
+                <div className="space-y-2 group">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest group-focus-within:text-[#c11e3c] transition-colors">
+                        Nome do Sistema
+                    </label>
                     <Input
                         placeholder="Ex: Gestão Associados"
+                        className="h-12 px-4 rounded-xl border-slate-200 focus:border-[#c11e3c] focus:ring-[#c11e3c]/20 transition-all bg-slate-50/50 focus:bg-white"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
                 </div>
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">URL Base (HTTPS)</label>
+                <div className="space-y-2 group">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest group-focus-within:text-[#c11e3c] transition-colors">
+                        URL Base (HTTPS)
+                    </label>
                     <Input
                         placeholder="Ex: https://app.sbacem.com.br"
+                        className="h-12 px-4 rounded-xl border-slate-200 focus:border-[#c11e3c] focus:ring-[#c11e3c]/20 transition-all bg-slate-50/50 focus:bg-white"
                         value={formData.base_url}
                         onChange={(e) => setFormData({ ...formData, base_url: e.target.value })}
                     />
                 </div>
             </div>
 
-            <DialogFooter>
-                <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <DialogFooter className="p-6 pt-2 border-t border-slate-100 bg-slate-50/50 mt-2">
+                <Button 
+                    variant="ghost" 
+                    onClick={() => onOpenChange(false)} 
+                    disabled={isLoading}
+                    className="uppercase text-xs font-bold tracking-widest text-slate-500 hover:text-slate-700 hover:bg-slate-200 rounded-xl px-6" 
+                >
                     Cancelar
                 </Button>
                 <Button
-                    className="bg-[#c11e3c] hover:bg-[#a01830] text-white font-bold"
+                    className="bg-[#c11e3c] hover:bg-[#a01830] text-white uppercase text-xs font-bold tracking-widest rounded-xl px-8 shadow-lg shadow-red-200 transition-all hover:-translate-y-0.5"
                     onClick={handleSubmit}
                     disabled={isLoading}
                 >
-                    {isLoading ? "Salvando..." : "Salvar Sistema"}
+                    {isLoading ? "Processando..." : "Salvar Matriz"}
                 </Button>
             </DialogFooter>
         </Dialog>

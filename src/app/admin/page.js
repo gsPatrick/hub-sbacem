@@ -32,33 +32,26 @@ function AdminDashboardContent() {
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [isSystemModalOpen, setIsSystemModalOpen] = useState(false);
     const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
-    const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedProposalId, setSelectedProposalId] = useState(null);
 
     const [users, setUsers] = useState([]);
     const [systems, setSystems] = useState([]);
-    const [proposals, setProposals] = useState([]);
     const [auditLogs, setAuditLogs] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [search, setSearch] = useState("");
-    const [searchTitular, setSearchTitular] = useState("");
-    const [filterAssociation, setFilterAssociation] = useState("");
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [usersRes, systemsRes, auditRes, proposalsRes] = await Promise.all([
+            const [usersRes, systemsRes, auditRes] = await Promise.all([
                 api.get("/users/"),
                 api.get("/systems/"),
-                api.get("/audit/"),
-                api.get("/proposals")
+                api.get("/audit/")
             ]);
             setUsers(usersRes.data);
             setSystems(systemsRes.data);
             setAuditLogs(auditRes.data);
-            setProposals(proposalsRes.data.items || []);
         } catch (error) {
             console.error("Error fetching admin data", error);
         } finally {
@@ -73,7 +66,7 @@ function AdminDashboardContent() {
     const filteredUsers = users.filter((u) => u.email.includes(search));
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-[#152341] uppercase">Governança de Identidades</h1>
@@ -99,27 +92,21 @@ function AdminDashboardContent() {
             <div className="flex border-b border-slate-200">
                 <button
                     onClick={() => handleTabChange("users")}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "users" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === "users" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                 >
                     <Users className="h-4 w-4" /> Usuários
                 </button>
                 <button
                     onClick={() => handleTabChange("systems")}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "systems" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === "systems" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                 >
                     <LayoutGrid className="h-4 w-4" /> Sistemas
                 </button>
                 <button
                     onClick={() => handleTabChange("audit")}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "audit" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === "audit" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                 >
                     <FileText className="h-4 w-4" /> Auditoria
-                </button>
-                <button
-                    onClick={() => handleTabChange("titulares")}
-                    className={`px-4 py-2 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === "titulares" ? "border-[#c11e3c] text-[#c11e3c]" : "border-transparent text-slate-500 hover:text-slate-700"}`}
-                >
-                    <Music className="h-4 w-4" /> Titulares
                 </button>
             </div>
 
@@ -294,103 +281,12 @@ function AdminDashboardContent() {
                 </div>
             )}
 
-            {/* Content Titulares */}
-            {activeTab === "titulares" && (
-                <>
-                    <div className="flex items-center space-x-4 bg-white p-4 rounded-sm border border-slate-200 shadow-sm">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                            <Input
-                                placeholder="Buscar titular por nome, CPF ou protocolo..."
-                                className="pl-10 h-10 border-slate-300 rounded-sm"
-                                value={searchTitular}
-                                onChange={(e) => setSearchTitular(e.target.value)}
-                            />
-                        </div>
-                        <select
-                            className="h-10 px-3 border border-slate-300 rounded-sm text-sm font-medium bg-white outline-none focus:ring-1 focus:ring-[#c11e3c]"
-                            value={filterAssociation}
-                            onChange={(e) => setFilterAssociation(e.target.value)}
-                        >
-                            <option value="">Todas Associações</option>
-                            <option value="UBC">UBC</option>
-                            <option value="ABRAMUS">ABRAMUS</option>
-                            <option value="SICAM">SICAM</option>
-                            <option value="SOCINPRO">SOCINPRO</option>
-                            <option value="AMAR">AMAR</option>
-                            <option value="ASSIM">ASSIM</option>
-                            <option value="SADEMBRA">SADEMBRA</option>
-                        </select>
-                    </div>
-
-                    <div className="bg-white rounded-sm border border-slate-200 overflow-hidden shadow-sm">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider">
-                                <tr>
-                                    <th className="px-6 py-4">Protocolo</th>
-                                    <th className="px-6 py-4">Titular</th>
-                                    <th className="px-6 py-4">Associação</th>
-                                    <th className="px-6 py-4">Situação</th>
-                                    <th className="px-6 py-4 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {proposals.filter(p => 
-                                    (p.person.fullName.toLowerCase().includes(searchTitular.toLowerCase()) || 
-                                     p.protocol.toLowerCase().includes(searchTitular.toLowerCase())) &&
-                                    (filterAssociation ? p.person.association === filterAssociation : true)
-                                ).map((prop) => (
-                                    <tr key={prop.id} className="hover:bg-slate-50 transition-colors">
-                                        <td className="px-6 py-4 font-mono text-[10px] font-bold text-slate-400">
-                                            {prop.protocol}
-                                        </td>
-                                        <td className="px-6 py-4 font-semibold text-[#152341]">
-                                            {prop.person.fullName}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <Badge variant="outline" className="bg-slate-50">{prop.person.association || 'PENDENTE'}</Badge>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <Badge variant={prop.status === 'APROVADA' ? 'success' : prop.status === 'REJEITADA' ? 'destructive' : 'warning'}>
-                                                {prop.status}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-[#c11e3c] hover:bg-red-50 font-bold uppercase text-[10px] tracking-widest"
-                                                onClick={() => {
-                                                    setSelectedProposalId(prop.id);
-                                                    setIsProposalModalOpen(true);
-                                                }}
-                                            >
-                                                Detalhes
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        {proposals.length === 0 && !loading && (
-                            <div className="p-12 text-center text-slate-500">Nenhuma proposta de filiação encontrada.</div>
-                        )}
-                    </div>
-                </>
-            )}
-
             <UserModal open={isUserModalOpen} onOpenChange={setIsUserModalOpen} onSuccess={fetchData} />
             <SystemModal open={isSystemModalOpen} onOpenChange={setIsSystemModalOpen} onSuccess={fetchData} />
             <SystemAccessModal
                 open={isAccessModalOpen}
                 onOpenChange={setIsAccessModalOpen}
                 user={selectedUser}
-                onSuccess={fetchData}
-            />
-            <ProposalDetailModal
-                open={isProposalModalOpen}
-                onOpenChange={setIsProposalModalOpen}
-                proposalId={selectedProposalId}
                 onSuccess={fetchData}
             />
         </div>
